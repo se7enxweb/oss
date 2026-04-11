@@ -1,7 +1,7 @@
 {
     "name": "se7enxweb/oss",
     "type": "metapackage",
-    "license": "(GPL-2.0-only or proprietary)",
+    "license": "(GPL-2.0-or-later or proprietary)",
     "description": "A meta package for installing Ibexa Open Source (Pure)",
     "require": {
         "php": ">=8.3",
