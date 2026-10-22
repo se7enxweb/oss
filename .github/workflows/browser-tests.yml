@@ -35,6 +35,7 @@ jobs:
             skeleton: "ibexa/oss-skeleton"
             skeleton-version: "^5.0"
             package-name: "ibexa/oss"
+            database: "mysql"
             admin-paths: "/admin/login,/adminui/login"
             send-success-notification: ${{ inputs.send-success-notification == true }}
         secrets: inherit
