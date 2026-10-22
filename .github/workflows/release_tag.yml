@@ -1,15 +1,34 @@
 name: Call Create Release for tag Workflow
 
+# Creates the GitHub release for a pushed tag when none exists yet, with
+# notes from the history since the previous tag. An existing release is never
+# edited. On demand: the notes for any tag (dry-run only prints them).
+
 on:
   push:
     tags:
       - 'v*'
+      - '[0-9]*'
+      - '!v*-alpha*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag'
+        required: true
+        type: string
+      dry-run:
+        description: 'Only print the release notes'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
 
 jobs:
   create_release_for_tag:
-    uses: ibexa/gh-workflows/.github/workflows/release.yml@main
-    secrets:
-      AUTOMATION_CLIENT_ID: ${{ secrets.AUTOMATION_CLIENT_ID }}
-      AUTOMATION_CLIENT_INSTALLATION: ${{ secrets.AUTOMATION_CLIENT_INSTALLATION }}
-      AUTOMATION_CLIENT_SECRET: ${{ secrets.AUTOMATION_CLIENT_SECRET }}
-      JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
+    uses: se7enxweb/gh-workflows/.github/workflows/release.yml@main
+    with:
+      tag: ${{ inputs.tag || github.ref_name }}
+      wait-minutes: ${{ github.event_name != 'workflow_dispatch' && 10 || 0 }}
+      dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run }}
