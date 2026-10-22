@@ -33,6 +33,7 @@ jobs:
         with:
             project-version: ${{ inputs.project-version }}
             skeleton: "ibexa/oss-skeleton"
+            skeleton-version: "^5.0"
             package-name: "ibexa/oss"
             admin-paths: "/admin/login,/adminui/login"
             send-success-notification: ${{ inputs.send-success-notification == true }}
