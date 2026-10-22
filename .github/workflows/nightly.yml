@@ -1,9 +1,16 @@
 name: Nightly browser tests
+
+# Starts the browser tests of this repository every night on the branches
+# listed below (workflow_dispatch with the workflow token).
+
 on:
     schedule:
-        # Run tests every night
         - cron: "45 21 * * *"
     workflow_dispatch: ~
+
+permissions:
+    actions: write
+    contents: read
 
 jobs:
     nightly:
@@ -12,35 +19,13 @@ jobs:
             fail-fast: false
             max-parallel: 1
             matrix:
-                repository:
-                    - ibexa/oss
-                    - ibexa/headless
-                    - ibexa/experience
-                    - ibexa/commerce
                 branch:
-                    - "3.3"
-                    - "4.6"
                     - master
-                include:
-                    - repository: ibexa/content
-                      branch: "3.3"
-                exclude:
-                    - repository: ibexa/headless
-                      branch: "3.3"
         steps:
-            - uses: actions/create-github-app-token@v2
-              id: generate_token
-              with:
-                  app-id: ${{ secrets.AUTOMATION_CLIENT_ID }}
-                  private-key: ${{ secrets.AUTOMATION_CLIENT_SECRET }}
-                  owner: ${{ github.repository_owner }}
-            - uses: octokit/request-action@v2.x
-              name: Trigger workflow
-              with:
-                  repository: ${{ matrix.repository }}
-                  workflow: "browser-tests.yml"
-                  ref: "!!str ${{ matrix.branch }}"
-                  route: POST /repos/{repository}/actions/workflows/{workflow}/dispatches
-                  inputs: '{ "send-success-notification": "false" }'
+            - name: Trigger browser tests on ${{ matrix.branch }}
               env:
-                  GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+                  GH_TOKEN: ${{ github.token }}
+                  BRANCH: ${{ matrix.branch }}
+              run: |
+                  gh workflow run browser-tests.yml -R "$GITHUB_REPOSITORY" --ref "$BRANCH" -f send-success-notification=false
+                  echo "Started browser-tests.yml on ${BRANCH}"

@@ -1,15 +1,29 @@
 name: Post release
 
+# After the release workflow succeeded for a tag: refresh the package on
+# Packagist (PACKAGIST_USERNAME / PACKAGIST_TOKEN) and, when configured,
+# dispatch an archive build. Both skip cleanly without their secrets; a run
+# that did not come from a tag does nothing.
+
 on:
   workflow_run:
     workflows: ["Call Create Release for tag Workflow"]
     types:
       - completed
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Released tag'
+        required: true
+        type: string
+
+permissions:
+  contents: read
 
 jobs:
   call-post-release:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    uses: ibexa/gh-workflows/.github/workflows/post_release.yaml@main
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    uses: se7enxweb/gh-workflows/.github/workflows/post_release.yaml@main
     with:
-      tag: ${{ github.event.workflow_run.head_branch }}
+      tag: ${{ inputs.tag || github.event.workflow_run.head_branch }}
     secrets: inherit
